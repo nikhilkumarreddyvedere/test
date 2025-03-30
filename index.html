@@ -1,0 +1,1719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Healthcare Access Initiative</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --secondary: #10b981;
+            --dark: #1e293b;
+            --dark-light: #334155;
+            --light: #f8fafc;
+            --white: #ffffff;
+            --accent: #f59e0b;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            --rounded-sm: 8px;
+            --rounded-md: 12px;
+            --rounded-lg: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background-color: var(--light);
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        section {
+            padding: 80px 0;
+            position: relative;
+        }
+
+        /* Header Styles */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            transition: var(--transition);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .logo i {
+            font-size: 28px;
+            color: var(--secondary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 500;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient);
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--dark);
+            cursor: pointer;
+        }
+
+        /* Hero Styles */
+   .hero {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient);
+            opacity: 0.3;
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: var(--rounded-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .hero h1 {
+            font-size: 56px;
+            margin-bottom: 24px;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            font-size: 18px;
+            margin-bottom: 32px;
+            opacity: 0.9;
+        }
+
+        /* Button Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: var(--rounded-sm);
+            font-weight: 500;
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: var(--white);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--white);
+            border: 2px solid var(--white);
+        }
+
+        .btn-outline:hover {
+            background: var(--white);
+            color: var(--primary);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        /* Section Header Styles */
+        .section-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .section-header h2 {
+            font-size: 40px;
+            margin-bottom: 16px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-header h2::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--gradient);
+            border-radius: 2px;
+        }
+
+        .section-header p {
+            max-width: 700px;
+            margin: 0 auto;
+            font-size: 18px;
+            color: var(--dark-light);
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--white);
+            border-radius: var(--rounded-md);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            transition: var(--transition);
+            height: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+
+      .card-img {
+    height: 200px;
+    overflow: hidden;
+    position: relative;
+}
+      .card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition);
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+        .card:hover .card-img img {
+            transform: scale(1.05);
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        .card h3 {
+            font-size: 22px;
+            margin-bottom: 12px;
+            color: var(--primary);
+        }
+
+        .card p {
+            color: var(--dark-light);
+            margin-bottom: 16px;
+        }
+
+        .card-footer {
+            padding: 0 24px 24px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tag-primary {
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+        }
+
+        .tag-secondary {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--secondary);
+        }
+
+        .tag-accent {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--accent);
+        }
+
+        /* Grid Styles */
+        .grid {
+            display: grid;
+            gap: 24px;
+        }
+
+        .grid-cols-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .grid-cols-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .grid-cols-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        /* Facility Locator Styles */
+        .facility-locator {
+            background: var(--white);
+            border-radius: var(--rounded-lg);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+        }
+
+        .locator-header {
+            padding: 24px;
+            background: var(--gradient);
+            color: var(--white);
+        }
+
+        .locator-header h3 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .locator-controls {
+            display: flex;
+            gap: 16px;
+            padding: 24px;
+            background: var(--light);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .locator-controls input, 
+        .locator-controls select {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--rounded-sm);
+            font-family: inherit;
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        .locator-controls input:focus, 
+        .locator-controls select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+    #map {
+    height: 500px;
+    width: 100%;
+    min-height: 300px;
+}
+
+        .facility-list {
+            padding: 24px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .facility-card {
+            display: flex;
+            flex-direction: column;
+            background: var(--white);
+            border-radius: var(--rounded-md);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .facility-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+.facility-card-img {
+    height: 160px;
+    overflow: hidden;
+    position: relative;
+}
+
+     .facility-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+        .facility-card-body {
+            padding: 16px;
+            flex-grow: 1;
+        }
+
+        .facility-card h4 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .facility-card p {
+            font-size: 14px;
+            color: var(--dark-light);
+            margin-bottom: 8px;
+        }
+
+        .facility-card-footer {
+            padding: 0 16px 16px;
+        }
+
+        /* Stats Section */
+        .stats {
+            background: var(--gradient);
+            color: var(--white);
+            text-align: center;
+            padding: 60px 0;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+        }
+
+        .stat-item {
+            padding: 24px;
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .stat-label {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        /* Testimonials */
+        .testimonials {
+            background-color: var(--light);
+        }
+
+        .testimonial-card {
+            background: var(--white);
+            border-radius: var(--rounded-md);
+            padding: 32px;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+        }
+
+        .testimonial-card::before {
+            content: '"';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 80px;
+            font-family: 'Playfair Display', serif;
+            color: rgba(37, 99, 235, 0.1);
+            line-height: 1;
+            z-index: 0;
+        }
+
+        .testimonial-content {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 24px;
+            font-style: italic;
+            color: var(--dark-light);
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+     .testimonial-author img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+        .author-info h4 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .author-info p {
+            font-size: 14px;
+            color: var(--dark-light);
+        }
+
+        /* Newsletter */
+        .newsletter {
+            background: var(--primary);
+            color: var(--white);
+            text-align: center;
+            padding: 80px 0;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), url('https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .newsletter h3 {
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+
+        .newsletter p {
+            max-width: 600px;
+            margin: 0 auto 32px;
+            opacity: 0.9;
+        }
+
+        .newsletter-form {
+            display: flex;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .newsletter-form input {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: var(--rounded-sm) 0 0 var(--rounded-sm);
+            font-family: inherit;
+            font-size: 16px;
+        }
+
+        .newsletter-form input:focus {
+            outline: none;
+        }
+
+        .newsletter-form button {
+            padding: 0 24px;
+            background: var(--secondary);
+            color: var(--white);
+            border: none;
+            border-radius: 0 var(--rounded-sm) var(--rounded-sm) 0;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .newsletter-form button:hover {
+            background: #0ea371;
+        }
+
+       /* Footer Styles */
+footer {
+    background: var(--dark);
+    color: var(--white);
+    padding: 80px 0 24px;
+    margin-top: 40px;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px;
+    margin-bottom: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.footer-col {
+    padding: 0 15px;
+}
+
+.footer-col h4 {
+    font-size: 18px;
+    margin-bottom: 24px;
+    position: relative;
+    padding-bottom: 12px;
+    font-family: 'Playfair Display', serif;
+}
+
+.footer-col h4::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: var(--gradient);
+}
+
+.footer-col p {
+    opacity: 0.7;
+    margin-bottom: 16px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.footer-links {
+    list-style: none;
+}
+
+.footer-links li {
+    margin-bottom: 12px;
+}
+
+.footer-links a {
+    color: var(--white);
+    opacity: 0.7;
+    text-decoration: none;
+    transition: var(--transition);
+    font-size: 14px;
+    display: block;
+}
+
+.footer-links a:hover {
+    opacity: 1;
+    color: var(--primary-light);
+    padding-left: 5px;
+}
+
+.social-links {
+    display: flex;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.social-links a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--white);
+    transition: var(--transition);
+}
+
+.social-links a:hover {
+    background: var(--primary);
+    transform: translateY(-3px);
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 40px;
+    font-size: 14px;
+    opacity: 0.7;
+    max-width: 1200px;
+    margin: 40px auto 0;
+    padding: 24px 24px 0;
+}
+
+/* Responsive Footer */
+@media (max-width: 1024px) {
+    .footer-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    footer {
+        padding: 60px 0 20px;
+    }
+    
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .footer-col {
+        padding: 0;
+    }
+    
+    .footer-col h4 {
+        margin-bottom: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    footer {
+        padding: 50px 0 20px;
+    }
+    
+    .social-links {
+        justify-content: center;
+    }
+}
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .grid-cols-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 32px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 42px;
+            }
+            
+            .section-header h2 {
+                font-size: 32px;
+            }
+            
+            .grid-cols-3, .grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .hero-content {
+                padding: 24px;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .newsletter-form {
+                flex-direction: column;
+            }
+            
+            .newsletter-form input {
+                border-radius: var(--rounded-sm);
+                margin-bottom: 8px;
+            }
+            
+            .newsletter-form button {
+                border-radius: var(--rounded-sm);
+                padding: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 36px;
+            }
+            
+            .section {
+                padding: 60px 0;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="#" class="logo">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>HealthAccess</span>
+                </a>
+                <div class="nav-links">
+                    <a href="#about" class="active">About</a>
+                    <a href="#barriers">Barriers</a>
+                    <a href="#solutions">Solutions</a>
+                    <a href="#locator">Find Care</a>
+                    <a href="#sdg3">SDG 3</a>
+                    <a href="#contact">Contact</a>
+                </div>
+                <button class="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Healthcare Should Be Accessible To All</h1>
+                <p>Join our initiative to break down barriers and create equitable healthcare solutions worldwide</p>
+                <div class="btn-group">
+                    <a href="#locator" class="btn btn-primary">
+                        <i class="fas fa-map-marker-alt"></i> Find Facilities
+                    </a>
+                    <a href="#solutions" class="btn btn-outline">
+                        <i class="fas fa-lightbulb"></i> Explore Solutions
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Why Healthcare Access Matters</h2>
+                <p>Access to healthcare is essential for maintaining overall well-being, preventing diseases, and managing chronic conditions. When people can't access healthcare, it leads to preventable suffering and higher costs.</p>
+            </div>
+            <div class="grid grid-cols-3">
+                <div class="card">
+                    <div class="card-img">
+                        <img src="https://images.unsplash.com/photo-1505751172876-fa1923c5c528?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" alt="Preventive Care">
+                    </div>
+                    <div class="card-body">
+                        <h3>Preventive Care</h3>
+                        <p>Regular access to healthcare prevents diseases before they become serious and costly to treat.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="tag tag-primary">Essential</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-img">
+                        <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" alt="Community Health">
+                    </div>
+                    <div class="card-body">
+                        <h3>Community Health</h3>
+                        <p>When individuals are healthy, entire communities thrive economically and socially.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="tag tag-secondary">Impact</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-img">
+                        <img src="https://images.unsplash.com/photo-1581056771107-24ca5f033842?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" alt="Human Right">
+                    </div>
+                    <div class="card-body">
+                        <h3>Basic Human Right</h3>
+                        <p>Healthcare is a fundamental right that should be available to all people regardless of circumstances.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="tag tag-accent">Right</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="stats-container">
+                <div class="stat-item">
+                    <div class="stat-number">2B+</div>
+                    <div class="stat-label">People lack essential services</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">100M</div>
+                    <div class="stat-label">Pushed into poverty yearly</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">18M</div>
+                    <div class="stat-label">Health worker shortage</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">90%</div>
+                    <div class="stat-label">In low-income countries lack coverage</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Barriers Section -->
+    <section id="barriers" class="section light">
+        <div class="container">
+            <div class="section-header">
+                <h2>Key Barriers to Healthcare Access</h2>
+                <p>These are the major challenges preventing millions from receiving the care they need</p>
+            </div>
+            <div class="grid grid-cols-2">
+                <div class="card">
+                    <div class="card-body">
+                        <h3><i class="fas fa-money-bill-wave" style="color: var(--primary); margin-right: 8px;"></i> Financial Constraints</h3>
+                        <p>High costs of healthcare services, insurance, and medications prevent many from seeking care. Nearly 30% of people worldwide cannot afford essential medicines.</p>
+                        <ul style="margin-left: 20px; color: var(--dark-light); margin-top: 12px;">
+                            <li>Average hospital stay costs 5x monthly income in developing nations</li>
+                            <li>500 million people pushed into poverty due to healthcare costs</li>
+                            <li>Only 1 in 5 low-income individuals have health insurance</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <h3><i class="fas fa-map-marker-alt" style="color: var(--secondary); margin-right: 8px;"></i> Geographical Challenges</h3>
+                        <p>Rural and remote areas often lack nearby healthcare facilities, forcing patients to travel long distances for basic care.</p>
+                        <ul style="margin-left: 20px; color: var(--dark-light); margin-top: 12px;">
+                            <li>40% of rural residents lack access to hospitals within 50km</li>
+                            <li>Transportation costs account for 30% of healthcare expenses</li>
+                            <li>Mobile clinics reach only 15% of underserved populations</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <h3><i class="fas fa-user-md" style="color: var(--accent); margin-right: 8px;"></i> Workforce Shortages</h3>
+                        <p>Insufficient healthcare providers in underserved areas create long wait times and limited services.</p>
+                        <ul style="margin-left: 20px; color: var(--dark-light); margin-top: 12px;">
+                            <li>Africa bears 24% of global disease burden but has only 3% of health workers</li>
+                            <li>Average wait time for specialists exceeds 3 months in rural areas</li>
+                            <li>1 doctor per 10,000 people in low-income countries</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <h3><i class="fas fa-language" style="color: var(--primary); margin-right: 8px;"></i> Cultural Barriers</h3>
+                        <p>Language differences and cultural insensitivity prevent many from seeking or receiving appropriate care.</p>
+                        <ul style="margin-left: 20px; color: var(--dark-light); margin-top: 12px;">
+                            <li>60% of non-native patients report communication difficulties</li>
+                            <li>Cultural taboos prevent 40% from seeking reproductive care</li>
+                            <li>Discrimination leads to 25% lower treatment adherence</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Facility Locator -->
+    <section id="locator" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Find Healthcare Facilities</h2>
+                <p>Locate nearby hospitals, clinics, and affordable care options in your area</p>
+            </div>
+            <div class="facility-locator">
+                <div class="locator-header">
+                    <h3>Healthcare Facility Locator</h3>
+                    <p>Search for facilities by location, services, or affordability</p>
+                </div>
+                <div class="locator-controls">
+                    <input type="text" id="facility-search" placeholder="Search by facility name or service...">
+                    <select id="facility-filter">
+                        <option value="all">All Facility Types</option>
+                        <option value="affordable">Affordable Options</option>
+                        <option value="hospitals">Hospitals</option>
+                        <option value="clinics">Clinics</option>
+                        <option value="specialty">Specialty Centers</option>
+                    </select>
+                </div>
+                <div id="map"></div>
+                <div class="facility-list" id="facility-list"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solutions Section -->
+    <section id="solutions" class="section primary">
+        <div class="container">
+            <div class="section-header">
+                <h2>Innovative Solutions</h2>
+                <p>Proven approaches to expanding healthcare access worldwide</p>
+            </div>
+            <div class="grid grid-cols-3">
+                <div class="card">
+                    <div class="card-img">
+                        <img src="https://images.unsplash.com/photo-1579684453423-f84349ef60b0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2089&q=80" alt="Telemedicine">
+                    </div>
+                    <div class="card-body">
+                        <h3>Telemedicine</h3>
+                        <p>Virtual consultations connect patients with specialists across distances, reducing travel burdens.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="tag tag-primary">Technology</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-img">
+                        <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" alt="Community Health">
+                    </div>
+                    <div class="card-body">
+                        <h3>Community Health Workers</h3>
+                        <p>Local trained providers deliver basic care and health education in underserved areas.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="tag tag-secondary">Local</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-img">
+                        <img src="https://images.unsplash.com/photo-1631815588090-d4bfec5b1ccb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" alt="Mobile Clinics">
+                    </div>
+                    <div class="card-body">
+                        <h3>Mobile Clinics</h3>
+                        <p>Vehicle-based services bring healthcare directly to remote communities.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="tag tag-accent">Innovation</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <h3><i class="fas fa-hand-holding-usd" style="color: var(--secondary); margin-right: 8px;"></i> Microinsurance</h3>
+                        <p>Affordable, community-based health insurance models for low-income populations.</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <h3><i class="fas fa-prescription-bottle-alt" style="color: var(--primary); margin-right: 8px;"></i> Generic Medications</h3>
+                        <p>Expanding access to low-cost generic drugs reduces treatment costs by up to 90%.</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <h3><i class="fas fa-graduation-cap" style="color: var(--accent); margin-right: 8px;"></i> Health Education</h3>
+                        <p>Community programs that teach prevention and early intervention techniques.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="section testmonials">
+        <div class="container">
+            <div class="section-header">
+                <h2>Success Stories</h2>
+                <p>How improved healthcare access has transformed lives and communities</p>
+            </div>
+            <div class="grid grid-cols-2">
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        "The mobile clinic coming to our village changed everything. Before, we had to walk 12 miles for basic care. Now my children get regular checkups and my diabetes is under control."
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Maria G.">
+                        <div class="author-info">
+                            <h4>Maria Gutierrez</h4>
+                            <p>Village Health Advocate, Honduras</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        "As a community health worker, I've seen how education and basic care can prevent emergencies. We've reduced childhood mortality by 60% in our district through vaccination programs."
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Kwame A.">
+                        <div class="author-info">
+                            <h4>Kwame Asante</h4>
+                            <p>Community Health Worker, Ghana</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SDG 3 Section -->
+    <section id="sdg3" class="section light">
+        <div class="container">
+            <div class="section-header">
+                <h2>Sustainable Development Goal 3</h2>
+                <p>UN's global initiative to ensure healthy lives and promote well-being for all</p>
+            </div>
+            <div class="grid grid-cols-2">
+                <div>
+                    <h3 style="margin-bottom: 16px;">Key Targets</h3>
+                    <ul style="margin-left: 20px; color: var(--dark-light);">
+                        <li style="margin-bottom: 12px;"><strong>3.1</strong> Reduce global maternal mortality ratio to less than 70 per 100,000 live births</li>
+                        <li style="margin-bottom: 12px;"><strong>3.2</strong> End preventable deaths of newborns and children under 5</li>
+                        <li style="margin-bottom: 12px;"><strong>3.3</strong> End epidemics of AIDS, tuberculosis, malaria and combat hepatitis</li>
+                        <li style="margin-bottom: 12px;"><strong>3.4</strong> Reduce premature mortality from non-communicable diseases by 30%</li>
+                        <li style="margin-bottom: 12px;"><strong>3.5</strong> Strengthen prevention and treatment of substance abuse</li>
+                        <li style="margin-bottom: 12px;"><strong>3.6</strong> Halve global deaths and injuries from road traffic accidents</li>
+                        <li style="margin-bottom: 12px;"><strong>3.7</strong> Ensure universal access to sexual and reproductive healthcare</li>
+                        <li style="margin-bottom: 12px;"><strong>3.8</strong> Achieve universal health coverage</li>
+                        <li style="margin-bottom: 12px;"><strong>3.9</strong> Reduce deaths from hazardous chemicals and pollution</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 style="margin-bottom: 16px;">How You Can Contribute</h3>
+                    <div class="card" style="height: auto;">
+                        <div class="card-body">
+                            <h3 style="color: var(--secondary);"><i class="fas fa-hands-helping" style="margin-right: 8px;"></i> Get Involved</h3>
+                            <ul style="margin-left: 20px; margin-top: 12px;">
+                                <li style="margin-bottom: 8px;">Advocate for healthcare policies in your community</li>
+                                <li style="margin-bottom: 8px;">Support organizations working on SDG 3 initiatives</li>
+                                <li style="margin-bottom: 8px;">Volunteer at local health clinics or awareness programs</li>
+                                <li style="margin-bottom: 8px;">Educate others about preventive health measures</li>
+                                <li style="margin-bottom: 8px;">Donate to fund medical supplies in underserved areas</li>
+                            </ul>
+                            <a href="#" class="btn btn-primary" style="margin-top: 16px; display: inline-block;">
+                                <i class="fas fa-heart"></i> Support Our Work
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter -->
+    <section class="newsletter">
+        <div class="container">
+            <h3>Stay Updated on Healthcare Access</h3>
+            <p>Subscribe to our newsletter for the latest initiatives, success stories, and ways to get involved.</p>
+            <form class="newsletter-form">
+                <input type="email" placeholder="Your email address" required>
+                <button type="submit">Subscribe</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+   <!-- Footer Section -->
+<footer id="contact">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-grid">
+        <!-- Column 1 -->
+        <div class="footer-col">
+          <div class="footer-logo">
+            <i class="fas fa-heartbeat"></i>
+            <span>HealthAccess</span>
+          </div>
+          <p class="footer-about">
+            Working to make quality healthcare accessible to all people worldwide through innovative solutions and policy advocacy.
+          </p>
+          <div class="social-links">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+
+        <!-- Column 2 -->
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="#about">About Us</a></li>
+            <li><a href="#barriers">Barriers</a></li>
+            <li><a href="#solutions">Solutions</a></li>
+            <li><a href="#locator">Find Care</a></li>
+            <li><a href="#sdg3">SDG 3</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 3 -->
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <ul class="footer-links">
+            <li><a href="#">Research Papers</a></li>
+            <li><a href="#">Policy Briefs</a></li>
+            <li><a href="#">Toolkits</a></li>
+            <li><a href="#">Volunteer</a></li>
+            <li><a href="#">Donate</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 4 -->
+        <div class="footer-col">
+          <h4>Contact Us</h4>
+          <div class="contact-info">
+            <p><i class="fas fa-map-marker-alt"></i> 123 Health Ave, Global City</p>
+            <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
+            <p><i class="fas fa-envelope"></i> info@healthaccess.org</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2023 HealthAccess Initiative. All rights reserved.</p>
+        <div class="legal-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">Accessibility</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+<style>
+  /* Footer Styles */
+footer {
+  background: var(--dark);
+  color: var(--white);
+  padding: 80px 0 0;
+  position: relative;
+  margin-top: 80px;
+}
+
+footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--gradient);
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+  margin-bottom: 60px;
+}
+
+.footer-col {
+  padding: 0 15px;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 20px;
+}
+
+.footer-logo i {
+  color: var(--secondary);
+  font-size: 28px;
+}
+
+.footer-about {
+  opacity: 0.8;
+  margin-bottom: 25px;
+  line-height: 1.7;
+}
+
+.footer-col h4 {
+  font-size: 18px;
+  margin-bottom: 25px;
+  position: relative;
+  padding-bottom: 10px;
+  font-family: 'Playfair Display', serif;
+}
+
+.footer-col h4::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background: var(--gradient);
+}
+
+.footer-links {
+  list-style: none;
+}
+
+.footer-links li {
+  margin-bottom: 12px;
+}
+
+.footer-links a {
+  color: var(--white);
+  opacity: 0.8;
+  text-decoration: none;
+  transition: var(--transition);
+  font-size: 15px;
+  display: inline-block;
+}
+
+.footer-links a:hover {
+  opacity: 1;
+  color: var(--primary-light);
+  transform: translateX(5px);
+}
+
+.contact-info p {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0.8;
+}
+
+.contact-info i {
+  width: 20px;
+  text-align: center;
+  color: var(--secondary);
+}
+
+.social-links {
+  display: flex;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+.social-links a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--white);
+  transition: var(--transition);
+  font-size: 16px;
+}
+
+.social-links a:hover {
+  background: var(--primary);
+  transform: translateY(-3px);
+}
+
+.newsletter {
+  margin-top: 25px;
+}
+
+.newsletter h5 {
+  font-size: 16px;
+  margin-bottom: 15px;
+  opacity: 0.9;
+}
+
+.newsletter-form {
+  display: flex;
+}
+
+.newsletter-form input {
+  flex: 1;
+  padding: 12px 15px;
+  border: none;
+  border-radius: 4px 0 0 4px;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.newsletter-form button {
+  padding: 0 18px;
+  background: var(--secondary);
+  color: white;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.newsletter-form button:hover {
+  background: #0ea371;
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 25px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.footer-bottom p {
+  opacity: 0.7;
+  font-size: 14px;
+}
+
+.legal-links {
+  display: flex;
+  gap: 20px;
+}
+
+.legal-links a {
+  color: var(--white);
+  opacity: 0.7;
+  font-size: 13px;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.legal-links a:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* Responsive Footer */
+@media (max-width: 768px) {
+  footer {
+    padding: 60px 0 0;
+    margin-top: 60px;
+  }
+  
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  
+  .footer-col {
+    padding: 0;
+  }
+  
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .legal-links {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .newsletter-form {
+    flex-direction: column;
+  }
+  
+  .newsletter-form input {
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+  
+  .newsletter-form button {
+    border-radius: 4px;
+    padding: 12px;
+  }
+}
+</style>
+
+    <script>
+        $(document).ready(function() {
+            // Sample facility data
+            const facilities = [
+                {
+                    id: 1,
+                    name: "City General Hospital",
+                    type: "Hospital",
+                    services: ["Emergency", "Surgery", "Pediatrics"],
+                    location: [51.505, -0.09],
+                    affordable: true,
+                    address: "123 Health St, Medical City",
+                    phone: "(555) 123-4567",
+                    image: "https://images.unsplash.com/photo-1581595219315-a187dd40c322?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                },
+                {
+                    id: 2,
+                    name: "Community Health Center",
+                    type: "Clinic",
+                    services: ["Primary Care", "Vaccinations", "Women's Health"],
+                    location: [51.51, -0.1],
+                    affordable: true,
+                    address: "456 Wellness Ave, Community Town",
+                    phone: "(555) 234-5678",
+                    image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                },
+                {
+                    id: 3,
+                    name: "Metropolitan Specialty Hospital",
+                    type: "Hospital",
+                    services: ["Cardiology", "Oncology", "Neurology"],
+                    location: [51.515, -0.095],
+                    affordable: false,
+                    address: "789 Specialist Blvd, Metro City",
+                    phone: "(555) 345-6789",
+                    image: "https://images.unsplash.com/photo-1530026186672-2cd00ffc50fe?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                },
+                {
+                    id: 4,
+                    name: "Rural Health Clinic",
+                    type: "Clinic",
+                    services: ["Primary Care", "Pediatrics", "Geriatrics"],
+                    location: [51.495, -0.085],
+                    affordable: true,
+                    address: "321 Country Rd, Rural Village",
+                    phone: "(555) 456-7890",
+                    image: "https://images.unsplash.com/photo-1579684453423-f84349ef60b0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2089&q=80"
+                },
+                {
+                    id: 5,
+                    name: "Free Community Clinic",
+                    type: "Clinic",
+                    services: ["Basic Care", "Dental", "Vision"],
+                    location: [51.5, -0.08],
+                    affordable: true,
+                    address: "654 Charity Lane, Downtown",
+                    phone: "(555) 567-8901",
+                    image: "https://images.unsplash.com/photo-1631815588090-d4bfec5b1ccb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                }
+            ];
+
+            // Initialize map
+            let map = L.map('map').setView([51.505, -0.09], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // Try to get user's location
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const userLatLng = [position.coords.latitude, position.coords.longitude];
+                    map.setView(userLatLng, 13);
+                    L.marker(userLatLng)
+                        .addTo(map)
+                        .bindPopup("Your Location")
+                        .openPopup();
+                }, function(error) {
+                    console.log("Error getting location: " + error.message);
+                });
+            }
+
+            // Add facility markers
+            const markers = [];
+            facilities.forEach(facility => {
+                const marker = L.marker(facility.location)
+                    .addTo(map)
+                    .bindPopup(`
+                        <div style="min-width: 200px;">
+                            <h4 style="margin: 0 0 8px; color: var(--primary);">${facility.name}</h4>
+                            <p style="margin: 0 0 4px;"><strong>Type:</strong> ${facility.type}</p>
+                            <p style="margin: 0 0 4px;"><strong>Services:</strong> ${facility.services.join(', ')}</p>
+                            ${facility.affordable ? '<p style="margin: 8px 0 0;"><span style="background: #4CAF50; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">Affordable Care</span></p>' : ''}
+                        </div>
+                    `);
+                markers.push(marker);
+            });
+
+            // Render facility list
+            function renderFacilityList(filter = 'all', search = '') {
+                const filtered = facilities.filter(facility => {
+                    const matchesFilter = filter === 'all' || 
+                                        (filter === 'affordable' && facility.affordable) ||
+                                        (filter === 'hospitals' && facility.type === 'Hospital') ||
+                                        (filter === 'clinics' && facility.type === 'Clinic') ||
+                                        (filter === 'specialty' && facility.services.some(s => ['Cardiology', 'Oncology', 'Neurology'].includes(s)));
+                    
+                    const matchesSearch = facility.name.toLowerCase().includes(search.toLowerCase()) ||
+                                         facility.services.some(s => s.toLowerCase().includes(search.toLowerCase())) ||
+                                         facility.address.toLowerCase().includes(search.toLowerCase());
+                    
+                    return matchesFilter && matchesSearch;
+                });
+
+                $('#facility-list').empty();
+                
+                if (filtered.length === 0) {
+                    $('#facility-list').append('<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--dark-light);">No facilities found matching your criteria. Try broadening your search.</p>');
+                    return;
+                }
+
+                filtered.forEach(facility => {
+                    $('#facility-list').append(`
+                        <div class="facility-card">
+                            <div class="facility-card-img">
+                                <img src="${facility.image}" alt="${facility.name}">
+                            </div>
+                            <div class="facility-card-body">
+                                <h4>${facility.name}</h4>
+                                <p><i class="fas fa-clinic-medical" style="margin-right: 6px;"></i> ${facility.type}</p>
+                                <p><i class="fas fa-map-marker-alt" style="margin-right: 6px;"></i> ${facility.address}</p>
+                                <p><i class="fas fa-phone" style="margin-right: 6px;"></i> ${facility.phone}</p>
+                                <p><i class="fas fa-procedures" style="margin-right: 6px;"></i> ${facility.services.join(', ')}</p>
+                            </div>
+                            <div class="facility-card-footer">
+                                ${facility.affordable ? '<span class="tag tag-secondary">Affordable Care Available</span>' : ''}
+                                <button class="btn btn-primary" onclick="alert('Directions to ${facility.name} would appear here')" style="width: 100%; margin-top: 12px;">
+                                    <i class="fas fa-directions"></i> Get Directions
+                                </button>
+                            </div>
+                        </div>
+                    `);
+                });
+            }
+
+            // Initial render
+            renderFacilityList();
+
+            // Filter and search functionality
+            $('#facility-filter, #facility-search').on('change input', function() {
+                const filter = $('#facility-filter').val();
+                const search = $('#facility-search').val();
+                renderFacilityList(filter, search);
+            });
+
+            // Smooth scrolling for navigation
+            $('a[href*="#"]').on('click', function(e) {
+                if ($(this).attr('href') === '#') return;
+                
+                e.preventDefault();
+                $('html, body').animate(
+                    {
+                        scrollTop: $($(this).attr('href')).offset().top - 80,
+                    },
+                    500,
+                    'swing'
+                );
+                
+                // Update active nav link
+                $('.nav-links a').removeClass('active');
+                $(this).addClass('active');
+            });
+
+            // Mobile menu toggle
+            $('.mobile-menu-btn').click(function() {
+                $('.nav-links').toggleClass('mobile-visible');
+            });
+
+            // Close mobile menu when clicking a link
+            $('.nav-links a').click(function() {
+                $('.nav-links').removeClass('mobile-visible');
+            });
+
+            // Highlight active section in nav
+            $(window).scroll(function() {
+                const scrollPosition = $(window).scrollTop();
+                
+                $('section').each(function() {
+                    const sectionId = $(this).attr('id');
+                    const sectionTop = $(this).offset().top - 100;
+                    const sectionBottom = sectionTop + $(this).outerHeight();
+                    
+                    if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+                        $('.nav-links a').removeClass('active');
+                        $('.nav-links a[href="#' + sectionId + '"]').addClass('active');
+                    }
+                });
+            });
+
+            // Newsletter form submission
+            $('.newsletter-form').submit(function(e) {
+                e.preventDefault();
+                const email = $(this).find('input').val();
+                alert(`Thank you for subscribing with ${email}! We'll keep you updated on our healthcare access initiatives.`);
+                $(this).find('input').val('');
+            });
+        });
+    </script>
+</body>
+</html>
